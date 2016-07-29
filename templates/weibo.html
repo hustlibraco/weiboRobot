@@ -7,7 +7,7 @@
 {% for i in weibos %}
 	<p>正文: {{ i['text' ]}}</p>
 	<p>作者: {{ i['author' ]}}</p>
-	<p>时间: {{ i['addtime' ]}}</p>
+	<p>时间: {{ datetime(i['addtime' ]) }}</p>
 	<hr/>
 {% endfor %}
 </body>
