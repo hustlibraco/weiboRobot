@@ -18,12 +18,6 @@ class MyClient(Client):
         super(MyClient, self).__init__(api_key, api_secret, redirect_uri, token, username, password)
         self.weibos = set()
     
-    def store_weibo(self):
-        mentions = self.get('comments/mentions')
-        for comment in mentions['comments']:
-            print comment
-            break
-
     def run(self, target):
         '''定时抓取'''
         while 1:
