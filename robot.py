@@ -12,6 +12,9 @@ app = Flask(__name__)
 
 WEIBOS = []
 
+def _datetime(x=None):
+    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(x))
+
 class MyClient(Client):
     def __init__(self, api_key, api_secret, redirect_uri, token=None,
                  username=None, password=None):
@@ -21,7 +24,11 @@ class MyClient(Client):
     def run(self, target):
         '''定时抓取'''
         while 1:
-            comments = self.get('comments/mentions')['comments']
+            try:
+                comments = self.get('comments/mentions')['comments']
+            except Exception, e:
+                print e
+                break
             for comment in comments:
                 # if comment['user']['name'] != WHOCANAT:
                 #     # 忽略陌生人的@
@@ -31,13 +38,15 @@ class MyClient(Client):
                 if origin['id'] in self.weibos:
                     # 忽略重复的@
                     continue
+                print u'new weibo: {0}, time: {1}, @ by {2}'.format(
+                    origin['id'], _datetime(), comment['user']['name'])
                 self.weibos.add(origin['id'])
-                w = {'text': origin['text'], 'author': origin['user']['name'], 'addtime': self._format(comment['created_at'])}
+                w = {'text': origin['text'], 'author': origin['user']['name'], 'addtime':self._format(status['created_at']), 'at_time': self._format(comment['created_at']), 'at_by': comment['user']['name']}
                 if len(target) > 0 and w['addtime'] > target[0]['addtime']:
                     target.insert(0, w)
                 else:
                     target.append(w)
-            time.sleep(60)
+            time.sleep(3600)
     
     def _format(self, t):
         return time.mktime(time.strptime(t, '%a %b %d %H:%M:%S +0800 %Y'))
@@ -49,7 +58,7 @@ def index():
 @app.context_processor
 def utility_processor():
     _globals = {
-        'datetime': lambda x: time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(x))
+        'datetime': _datetime
     }
     return _globals
 
