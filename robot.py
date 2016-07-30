@@ -1,5 +1,10 @@
 #coding=utf-8
 #!/usr/bin/env python
+import codecs
+import sys
+UTF8Writer = codecs.getwriter('utf8')
+sys.stdout = UTF8Writer(sys.stdout)
+
 import time
 import requests
 import threading
