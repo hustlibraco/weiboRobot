@@ -1,15 +1,53 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>微博</title>
+  <title>微博</title>
+  <link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/bootstrap/4.0.0-alpha.3/css/bootstrap.min.css">
+  <style type="text/css">
+    .container {margin-top: 20px;}
+    .img-modal {display: inline-block; width: auto;}
+    .modal {text-align: center;}
+  </style>
 </head>
 <body>
-{% for i in weibos %}
-	<p>正文: {{ i['text' ]}}</p>
-	<p>作者: {{ i['author' ]}}</p>
-	<p>时间: {{ datetime(i['addtime' ]) }}</p>
-	<p>@ by {{ i['at_by'] }} at {{ datetime(i['at_time'])}}</p>
-	<hr/>
-{% endfor %}
+  <div class="container">
+    <h1>
+      <a href="http://weibo.com/u/5992909524" target="_blank"><img src="{{ url_for('static', filename='avatar.jpg') }}" alt="sha256cc" class="img-circle"></a>
+      <small>来@sha256cc吧！</small>
+    </h1>
+  <hr/>
+  {% for i in weibos %}
+    <h6><strong>{{ i['author' ]}}</strong> <small>{{ datetime(i['addtime']) }}</small></h6>
+    <p>{{ i['text' ]}}</p>
+    {% if i.get('pics') %}
+      {% for img in i['pics'] %}
+        <a href="#" class="thumbnail" data-toggle="modal" data-target="#imageModal">
+          <img src="{{ img }}">
+        </a>
+      {% endfor %}
+    {% endif %}
+    <br/>
+    <small>@ by {{ i['at_by'] }} at {{ datetime(i['at_time'])}}</small>
+    <hr/>
+  {% endfor %}
+  </div>
 </body>
+<!-- Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog modal-lg img-modal" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <img id="largeimage">
+      </div>
+    </div>
+  </div>
+</div>
+<script src="//cdn.bootcss.com/jquery/3.1.0/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/bootstrap/4.0.0-alpha.3/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+  $('.thumbnail').click(function(){
+    var url = $(this).find('>img').attr('src');
+    $('#largeimage').attr('src', url.replace('thumbnail', 'large'));
+  });
+</script>
 </html>

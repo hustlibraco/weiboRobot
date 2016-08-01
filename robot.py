@@ -43,6 +43,8 @@ class MyClient(Client):
                 # if comment['user']['name'] != WHOCANAT:
                 #     # 忽略陌生人的@
                 #     continue
+                # print comment
+                # break
                 status = comment['status']
                 origin = status['retweeted_status'] if 'retweeted_status' in status else status
                 if self.weibos.find_one({'id':origin['id']}):
@@ -58,6 +60,9 @@ class MyClient(Client):
                     'at_time': self._format(comment['created_at']), 
                     'at_by': comment['user']['name']
                 }
+                if origin.get('pic_urls'):
+                	w['pics'] = [i['thumbnail_pic'] for i in origin['pic_urls']]
+                print w
                 self.weibos.insert_one(w)
             time.sleep(3600)
     
