@@ -4,7 +4,7 @@
 ## 安装依赖
 
 1. 安装mongodb
-2. 安装python模块，`pip install request, flask, pymongo` 
+2. 安装python模块，`pip install requests, flask, pymongo` 
 3. 在`weiboRobot`目录下新建配置文件`config.ini`, 内容如下
 ```ini
 [weibo]
