@@ -12,7 +12,7 @@ api_key = your_api_key
 api_secret = your_api_secret
 redirect_uri = your_redirect_uri
 username = username
-password = username
+password = password
 whocanat = whocanat  
 
 [mongo]
