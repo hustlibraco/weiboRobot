@@ -1,6 +1,7 @@
 #coding=utf-8
 #!/usr/bin/env python
 import codecs
+import os
 import sys
 UTF8Writer = codecs.getwriter('utf8')
 sys.stdout = UTF8Writer(sys.stdout)
@@ -13,9 +14,9 @@ import threading
 import pymongo
 import ConfigParser
 conf = ConfigParser.ConfigParser()
-conf.read('config.ini')
+conf.read(os.path.abspath(os.path.dirname(__file__)) + '/config.ini')
 
-from flask import Flask, render_template
+from flask import Flask, render_template, abort, redirect, url_for
 from weibo import Client
 
 app = Flask(__name__)
@@ -46,10 +47,9 @@ class MyClient(Client):
                 status = comment['status']
                 origin = status['retweeted_status'] if 'retweeted_status' in status else status
                 if self.weibos.find_one({'id':origin['id']}):
-                    # 忽略重复的@
-                    continue
+                	continue
                 print u'new weibo: {0}, time: {1}, @ by {2}'.format(
-                    origin['id'], _datetime(), comment['user']['name'])
+                     origin['id'], _datetime(), comment['user']['name'])
                 w = {
                     'id': origin['id'],
                     'text': origin['text'], 
@@ -68,8 +68,19 @@ class MyClient(Client):
 
 @app.route('/')
 def index():
-    weibos = mongo.sinaweibo.weibos.find().sort('at_time', pymongo.DESCENDING)
-    return render_template('weibo.html', weibos=weibos)
+    # return redirect(url_for('show', page=1))
+    return show(1)
+
+@app.route('/<page>')
+def show(page=1):
+    pagenum = 20
+    page = int(page)
+    weibo_count = mongo.sinaweibo.weibos.count()
+    skip = (page - 1) * pagenum
+    np = page + 1 if (page*pagenum < weibo_count) else False
+    lp = page - 1 if (page-1 > 0) else False
+    weibos = mongo.sinaweibo.weibos.find().sort('at_time', pymongo.DESCENDING).skip(skip).limit(pagenum)
+    return render_template('weibo.html', weibos=weibos, next=np, last=lp)
 
 @app.context_processor
 def utility_processor():

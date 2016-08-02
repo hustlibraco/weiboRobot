@@ -16,20 +16,28 @@
       <small>来@sha256cc吧！</small>
     </h1>
   <hr/>
-  {% for i in weibos %}
-    <h6><strong>{{ i['author' ]}}</strong> <small>{{ datetime(i['addtime']) }}</small></h6>
-    <p>{{ i['text' ]}}</p>
-    {% if i.get('pics') %}
-      {% for img in i['pics'] %}
-        <a href="#" class="thumbnail" data-toggle="modal" data-target="#imageModal">
-          <img src="{{ img }}">
-        </a>
-      {% endfor %}
-    {% endif %}
-    <br/>
-    <small>@ by {{ i['at_by'] }} at {{ datetime(i['at_time'])}}</small>
-    <hr/>
-  {% endfor %}
+  {% if weibos %}
+    {% for i in weibos %}
+      <h6><strong>{{ i['author' ]}}</strong> <small>{{ datetime(i['addtime']) }}</small></h6>
+      <p>{{ i['text' ]}}</p>
+      {% if i.get('pics') %}
+        {% for img in i['pics'] %}
+          <a href="#" class="thumbnail" data-toggle="modal" data-target="#imageModal">
+            <img src="{{ img }}">
+          </a>
+        {% endfor %}
+      {% endif %}
+      <br/>
+      <small>@ by {{ i['at_by'] }} at {{ datetime(i['at_time'])}}</small>
+      <hr/>
+    {% endfor %}
+  {% endif %}
+  {% if last %}
+  <a class="pull-left" href="{{ url_for('show', page=last) }}">上一页</a>
+  {% endif %}
+  {% if next %}
+  <a class="pull-right" href="{{ url_for('show', page=next) }}">下一页</a>
+  {% endif %}
   </div>
 </body>
 <!-- Modal -->
