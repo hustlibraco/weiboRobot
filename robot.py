@@ -49,7 +49,7 @@ class MyClient(Client):
                 if self.weibos.find_one({'id':origin['id']}):
                 	continue
                 print u'new weibo: {0}, time: {1}, @ by {2}'.format(
-                     origin['id'], _datetime(), comment['user']['name'])
+                    origin['id'], _datetime(), comment['user']['name'])
                 w = {
                     'id': origin['id'],
                     'text': origin['text'], 
