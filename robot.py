@@ -1,10 +1,13 @@
 #coding=utf-8
 #!/usr/bin/env python
-import codecs
 import os
 import sys
-UTF8Writer = codecs.getwriter('utf8')
-sys.stdout = UTF8Writer(sys.stdout)
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s] %(name)s:%(levelname)s: %(message)s"
+)
 
 import time
 import requests
@@ -38,7 +41,7 @@ class MyClient(Client):
             try:
                 comments = self.get('comments/mentions')['comments']
             except Exception, e:
-                print e
+                logging.error(e, exc_info=True)
                 break
             for comment in comments:
                 # if comment['user']['name'] != WHOCANAT:
@@ -48,8 +51,8 @@ class MyClient(Client):
                 origin = status['retweeted_status'] if 'retweeted_status' in status else status
                 if self.weibos.find_one({'id':origin['id']}):
                 	continue
-                print u'new weibo: {0}, time: {1}, @ by {2}'.format(
-                    origin['id'], _datetime(), comment['user']['name'])
+                logging.info(u'new weibo: {0}, time: {1}, @ by {2}'.format(
+                    origin['id'], _datetime(), comment['user']['name']))
                 w = {
                     'id': origin['id'],
                     'text': origin['text'], 
@@ -68,11 +71,18 @@ class MyClient(Client):
 
 @app.route('/')
 def index():
+    # 客户端跳转
     # return redirect(url_for('show', page=1))
+
+    # 相当于服务器内部跳转
     return show(1)
 
+@app.route('/favicon.ico')
+def favicon():
+    abort(404)
+
 @app.route('/<page>')
-def show(page=1):
+def show(page):
     pagenum = 20
     page = int(page)
     weibo_count = mongo.sinaweibo.weibos.count()
