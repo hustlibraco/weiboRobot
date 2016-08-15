@@ -37,33 +37,36 @@ class MyClient(Client):
     
     def run(self):
         '''定时抓取'''
+        times = 1
         while 1:
             try:
                 comments = self.get('comments/mentions')['comments']
             except Exception, e:
                 logging.error(e, exc_info=True)
-                break
-            for comment in comments:
-                # if comment['user']['name'] != WHOCANAT:
-                #     # 忽略陌生人的@
-                #     continue
-                status = comment['status']
-                origin = status['retweeted_status'] if 'retweeted_status' in status else status
-                if self.weibos.find_one({'id':origin['id']}):
-                	continue
-                logging.info(u'new weibo: {0}, time: {1}, @ by {2}'.format(
-                    origin['id'], _datetime(), comment['user']['name']))
-                w = {
-                    'id': origin['id'],
-                    'text': origin['text'], 
-                    'author': origin['user']['name'], 
-                    'addtime':self._format(status['created_at']), 
-                    'at_time': self._format(comment['created_at']), 
-                    'at_by': comment['user']['name']
-                }
-                if origin.get('pic_urls'):
-                	w['pics'] = [i['thumbnail_pic'] for i in origin['pic_urls']]
-                self.weibos.insert_one(w)
+            else:
+                logging.info('scrapy %s times.' % times)
+                times += 1
+                for comment in comments:
+                    # if comment['user']['name'] != WHOCANAT:
+                    #     # 忽略陌生人的@
+                    #     continue
+                    status = comment['status']
+                    origin = status['retweeted_status'] if 'retweeted_status' in status else status
+                    if self.weibos.find_one({'id':origin['id']}):
+                    	continue
+                    logging.info(u'new weibo: {0}, time: {1}, @ by {2}'.format(
+                        origin['id'], _datetime(), comment['user']['name']))
+                    w = {
+                        'id': origin['id'],
+                        'text': origin['text'], 
+                        'author': origin['user']['name'], 
+                        'addtime':self._format(status['created_at']), 
+                        'at_time': self._format(comment['created_at']), 
+                        'at_by': comment['user']['name']
+                    }
+                    if origin.get('pic_urls'):
+                    	w['pics'] = [i['thumbnail_pic'] for i in origin['pic_urls']]
+                    self.weibos.insert_one(w)
             time.sleep(3600)
     
     def _format(self, t):
@@ -77,11 +80,7 @@ def index():
     # 相当于服务器内部跳转
     return show(1)
 
-@app.route('/favicon.ico')
-def favicon():
-    abort(404)
-
-@app.route('/<page>')
+@app.route('/page/<page>')
 def show(page):
     pagenum = 20
     page = int(page)
