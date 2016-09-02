@@ -52,7 +52,11 @@ class MyClient(Client):
                     #     continue
                     status = comment['status']
                     origin = status['retweeted_status'] if 'retweeted_status' in status else status
+                    if origin.get('deleted') == '1':
+                        # 微博被删除
+                        continue
                     if self.weibos.find_one({'id':origin['id']}):
+                        # 微博已保存
                     	continue
                     logging.info(u'new weibo: {0}, time: {1}, @ by {2}'.format(
                         origin['id'], _datetime(), comment['user']['name']))
