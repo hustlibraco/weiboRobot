@@ -3,29 +3,39 @@
 import os
 import sys
 import logging
+import time
+import threading
+import ConfigParser
+import pymongo
+import requests
+from flask import Flask, render_template, abort, redirect, url_for
 
+import base62
+from weibo import Client
+
+requests.packages.urllib3.disable_warnings()
 logging.basicConfig(
     level=logging.INFO,
     format="[%(asctime)s] %(name)s:%(lineno)d:%(levelname)s: %(message)s"
 )
-
-import time
-import requests
-requests.packages.urllib3.disable_warnings()
-
-import threading
-import pymongo
-import ConfigParser
 conf = ConfigParser.ConfigParser()
 conf.read(os.path.abspath(os.path.dirname(__file__)) + '/config.ini')
 
-from flask import Flask, render_template, abort, redirect, url_for
-from weibo import Client
+
 
 app = Flask(__name__)
+N = 10 ** 7 # ~ 64 ** 4
 
 def _datetime(x=None):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(x))
+
+def weibo_url(uid, mid):
+    s = ''
+    while mid:
+        s = base62.encode(mid % N) + s
+        mid /= N
+    return u'http://weibo.com/{0}/{1}'.format(uid, s)
+
 
 mongo = pymongo.MongoClient(conf.get('mongo', 'host'), int(conf.get('mongo', 'port')))
 
@@ -34,6 +44,7 @@ class MyClient(Client):
                  username=None, password=None):
         super(MyClient, self).__init__(api_key, api_secret, redirect_uri, token, username, password)
         self.weibos = mongo.sinaweibo.weibos
+        self._picurl = 'http://ww1.sinaimg.cn/thumbnail/{0}.jpg'
     
     def run(self):
         '''定时抓取'''
@@ -52,6 +63,7 @@ class MyClient(Client):
                     #     continue
                     status = comment['status']
                     origin = status['retweeted_status'] if 'retweeted_status' in status else status
+
                     if origin.get('deleted') == '1':
                         # 微博被删除
                         continue
@@ -66,10 +78,11 @@ class MyClient(Client):
                         'author': origin['user']['name'], 
                         'addtime':self._format(status['created_at']), 
                         'at_time': self._format(comment['created_at']), 
-                        'at_by': comment['user']['name']
+                        'at_by': comment['user']['name'],
+                        'url': weibo_url(origin['user']['id'], int(origin['mid'])),
                     }
-                    if origin.get('pic_urls'):
-                    	w['pics'] = [i['thumbnail_pic'] for i in origin['pic_urls']]
+                    if origin.get('pic_ids'):
+                    	w['pics'] = [self._picurl.format(i) for i in origin['pic_ids']]
                     self.weibos.insert_one(w)
             time.sleep(3600)
     
