@@ -1,5 +1,6 @@
 BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
+
 def encode(num, alphabet=BASE62):
     """Encode a positive number in Base X
 
@@ -16,6 +17,7 @@ def encode(num, alphabet=BASE62):
         arr.append(alphabet[rem])
     arr.reverse()
     return ''.join(arr)
+
 
 def decode(string, alphabet=BASE62):
     """Decode a Base X encoded string into the number
