@@ -40,6 +40,7 @@
       <hr/>
     {% endfor %}
   {% endif %}
+  <p>共计{{ total_page }}页，当前{{ page }}页</p>
   {% if last %}
   <a class="pull-left" href="{{ url_for('show', page=last) }}">上一页</a>
   {% endif %}

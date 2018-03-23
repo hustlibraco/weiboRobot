@@ -3,6 +3,7 @@
 import os
 import logging
 import time
+import math
 import threading
 import ConfigParser
 import pymongo
@@ -21,6 +22,7 @@ conf.read(os.path.abspath(os.path.dirname(__file__)) + '/config.ini')
 
 app = Flask(__name__)
 N = 10**7  # ~ 64 ** 4
+pagenum = 10
 
 
 def _datetime(x=None):
@@ -111,15 +113,15 @@ def index():
 
 @app.route('/page/<page>')
 def show(page):
-    pagenum = 20
     page = int(page)
     weibo_count = mongo.sinaweibo.weibos.count()
+    total_page = int(math.ceil(float(weibo_count) / pagenum))
     skip = (page - 1) * pagenum
     np = page + 1 if (page * pagenum < weibo_count) else False
     lp = page - 1 if (page - 1 > 0) else False
     weibos = mongo.sinaweibo.weibos.find().sort(
         'at_time', pymongo.DESCENDING).skip(skip).limit(pagenum)
-    return render_template('weibo.html', weibos=weibos, next=np, last=lp)
+    return render_template('weibo.html', weibos=weibos, next=np, last=lp, page=page, total_page=total_page)
 
 
 @app.context_processor
