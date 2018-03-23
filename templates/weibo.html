@@ -19,27 +19,23 @@
       <small>来@sha256cc吧！</small>
     </h1>
   <hr/>
-  {% if weibos %}
-    {% for i in weibos %}
-      <h6>
-        <strong>{{ i['author' ]}}</strong>
-        <small>
-          <a href="{{ i['url' ] }}" target="_blank">{{ datetime(i['addtime']) }}</a>
-        </small>
-      </h6>
-      <p>{{ i['text' ]}}</p>
-      {% if i.get('pics') %}
-        {% for img in i['pics'] %}
-          <a href="#" class="thumbnail" data-toggle="modal" data-target="#imageModal">
-            <img src="{{ img }}">
-          </a>
-        {% endfor %}
-      {% endif %}
-      <br/>
-      <small>@ by {{ i['at_by'] }} at {{ datetime(i['at_time'])}}</small>
-      <hr/>
+  {% for i in weibos %}
+    <h6>
+      <strong>{{ i['author' ]}}</strong>
+      <small>
+        <a href="{{ i['url' ] }}" target="_blank">{{ datetime(i['addtime']) }}</a>
+      </small>
+    </h6>
+    <p>{{ i['text' ]}}</p>
+    {% for img in i['pics'] %}
+      <a href="#" class="thumbnail" data-toggle="modal" data-target="#imageModal">
+        <img src="{{ img }}">
+      </a>
     {% endfor %}
-  {% endif %}
+    <br/>
+    <small>@ by {{ i['at_by'] }} at {{ datetime(i['at_time'])}}</small>
+    <hr/>
+  {% endfor %}
   <p>共计{{ total_page }}页，当前{{ page }}页</p>
   {% if last %}
   <a class="pull-left" href="{{ url_for('show', page=last) }}">上一页</a>
@@ -49,7 +45,6 @@
   {% endif %}
   </div>
 </body>
-<!-- Modal -->
 <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
   <div class="modal-dialog modal-lg img-modal" role="document">
     <div class="modal-content">
